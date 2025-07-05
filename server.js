@@ -24,15 +24,21 @@ app.post('/api/generate', async (req, res) => {
     let generatedText = '';
 
     switch (llm) {
-      case 'gemini-1.5-pro-latest':
+      // Google Models
+      case 'gemini-2.5-pro':
+      case 'gemini-2.5-flash':
         const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: llm });
-        const result = await model.generateContent(prompt);
+        const modelGemini = genAI.getGenerativeModel({ model: llm });
+        const result = await modelGemini.generateContent(prompt);
         const response = await result.response;
         generatedText = response.text();
         break;
 
-      case 'gpt-4o': // Il modello più recente e potente di OpenAI
+      // OpenAI Models (Tutti quelli richiesti)
+      case 'gpt-4o-2024-08-06':
+      case 'o4-mini-2025-04-16':
+      case 'o3-mini-2025-01-31':
+      case 'o3-2025-04-16':
         const openai = new OpenAI({ apiKey });
         const chatCompletion = await openai.chat.completions.create({
           messages: [{ role: 'user', content: prompt }],
@@ -41,7 +47,9 @@ app.post('/api/generate', async (req, res) => {
         generatedText = chatCompletion.choices[0].message.content;
         break;
 
-      case 'claude-3-opus-20240229': // Il modello più potente di Anthropic
+      // Anthropic Models
+      case 'claude-opus-4-20250514':
+      case 'claude-sonnet-4-20250514':
         const anthropic = new Anthropic({ apiKey });
         const msg = await anthropic.messages.create({
           model: llm,
